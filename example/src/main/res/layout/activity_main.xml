@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.numeron.view.SideSlideLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Main Home"
+        android:textColor="@android:color/black"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center"
+        android:text="Top Page"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_side="top" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center"
+        android:text="First Bottom Page"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_side="bottom" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginTop="480dp"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:text="Second Bottom Page"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_side="bottom" />
+
+</com.numeron.view.SideSlideLayout>
