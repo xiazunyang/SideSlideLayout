@@ -11,7 +11,7 @@ import kotlin.math.abs
 
 
 class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = null, i: Int = 0) :
-    FrameLayout(c, a, i) {
+        FrameLayout(c, a, i) {
 
     enum class Direction {
 
@@ -120,8 +120,8 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
 
     override fun generateDefaultLayoutParams(): LayoutParams {
         return LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
         )
     }
 
@@ -141,39 +141,16 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
         return p is LayoutParams
     }
 
-    private fun scrollToTop() {
-        scroller.startScroll(scrollX, scrollY, -scrollX, bound.top - scrollY, 420)
-        invalidate()
-    }
-
-    private fun scrollToLeft() {
-        scroller.startScroll(scrollX, scrollY, bound.left - scrollX, -scrollY, 420)
-        invalidate()
-    }
-
-    private fun scrollToRight() {
-        scroller.startScroll(scrollX, scrollY, bound.right - scrollX - width, -scrollY, 420)
-        invalidate()
-    }
-
-    private fun scrollToBottom() {
-        scroller.startScroll(scrollX, scrollY, -scrollX, bound.bottom - scrollY - height, 420)
-        invalidate()
-    }
-
-    private fun scrollToCenter() {
-        scroller.startScroll(scrollX, scrollY, -scrollX, -scrollY, 420)
-        invalidate()
-    }
-
     fun scrollTo(direction: Direction) {
-        when (direction) {
-            Direction.TOP -> scrollToTop()
-            Direction.LEFT -> scrollToLeft()
-            Direction.NON -> scrollToCenter()
-            Direction.RIGHT -> scrollToRight()
-            Direction.BOTTOM -> scrollToBottom()
+        val (dx, dy) = when (direction) {
+            Direction.NON -> -scrollX to -scrollY
+            Direction.TOP -> -scrollX to bound.top - scrollY
+            Direction.LEFT -> bound.left - scrollX to -scrollY
+            Direction.RIGHT -> bound.right - scrollX - width to -scrollY
+            Direction.BOTTOM -> -scrollX to bound.bottom - scrollY - height
         }
+        scroller.startScroll(scrollX, scrollY, dx, dy, 420)
+        invalidate()
     }
 
     inner class LayoutParams : FrameLayout.LayoutParams {
@@ -219,13 +196,13 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
             //在手指接触到屏幕时，记录下当前位置
             if (scrollX == 0 && scrollY == 0) {
                 locate = Direction.NON
-            } else if (scrollX < 0 && scrollY == 0) {
+            } else if (scrollY == 0 && scrollX <= bound.left) {
                 locate = Direction.LEFT
-            } else if (scrollX > 0 && scrollY == 0) {
+            } else if (scrollY == 0 && scrollX + width >= bound.right) {
                 locate = Direction.RIGHT
-            } else if (scrollY < 0 && scrollX == 0) {
+            } else if (scrollX == 0 && scrollY <= bound.top) {
                 locate = Direction.TOP
-            } else if (scrollY > 0 && scrollX == 0) {
+            } else if (scrollX == 0 && scrollY + height >= bound.bottom) {
                 locate = Direction.BOTTOM
             }
             return true
@@ -236,10 +213,10 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
         }
 
         override fun onScroll(
-            e1: MotionEvent,
-            e2: MotionEvent,
-            distanceX: Float,
-            distanceY: Float
+                e1: MotionEvent,
+                e2: MotionEvent,
+                distanceX: Float,
+                distanceY: Float
         ): Boolean {
             //禁止父视图容器对触摸事件的拦截权限
             parent?.requestDisallowInterceptTouchEvent(true)
@@ -248,13 +225,13 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
             //根据滑动的方向和当前位置，来处理滑动效果
             if (!locate.isVertical && isHorizontal) {
                 //当前方向不是垂直的，并且是水平操作时，允许拖动
-                val distance =
-                    distanceX.toInt().coerceIn(bound.left - scrollX, bound.right - scrollX - width)
+                val distance = distanceX.toInt()
+                        .coerceIn(bound.left - scrollX, bound.right - scrollX - width)
                 scrollBy(distance, 0)
             } else if (!locate.isHorizontal && isVertical) {
                 //当前方向不是水平的，并且是垂直操作时，允许拖动
-                val distance =
-                    distanceY.toInt().coerceIn(bound.top - scrollY, bound.bottom - scrollY - height)
+                val distance = distanceY.toInt()
+                        .coerceIn(bound.top - scrollY, bound.bottom - scrollY - height)
                 scrollBy(0, distance)
             }
             return true
@@ -281,22 +258,22 @@ class SideSlideLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = n
         }
 
         override fun onFling(
-            e1: MotionEvent?,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
         ): Boolean {
             if (toLeft || toTop || toRight || toBottom) {
                 when (locate) {
-                    Direction.TOP -> if (toBottom && velocityY <= -200) scrollToCenter() else scrollToTop()
-                    Direction.LEFT -> if (toRight && velocityX <= -200) scrollToCenter() else scrollToLeft()
-                    Direction.RIGHT -> if (toLeft && velocityX >= 200) scrollToCenter() else scrollToRight()
-                    Direction.BOTTOM -> if (toTop && velocityY >= 200) scrollToCenter() else scrollToBottom()
+                    Direction.TOP -> if (toBottom && velocityY <= -200) scrollTo(Direction.NON) else scrollTo(Direction.TOP)
+                    Direction.LEFT -> if (toRight && velocityX <= -200) scrollTo(Direction.NON) else scrollTo(Direction.LEFT)
+                    Direction.RIGHT -> if (toLeft && velocityX >= 200) scrollTo(Direction.NON) else scrollTo(Direction.RIGHT)
+                    Direction.BOTTOM -> if (toTop && velocityY >= 200) scrollTo(Direction.NON) else scrollTo(Direction.BOTTOM)
                     Direction.NON -> when {
-                        toTop -> if (velocityY >= 200) scrollToTop() else scrollToCenter()
-                        toLeft -> if (velocityX >= 200) scrollToLeft() else scrollToCenter()
-                        toRight -> if (velocityX <= -200) scrollToRight() else scrollToCenter()
-                        toBottom -> if (velocityY <= -200) scrollToBottom() else scrollToCenter()
+                        toTop -> if (velocityY >= 200) scrollTo(Direction.TOP) else scrollTo(Direction.NON)
+                        toLeft -> if (velocityX >= 200) scrollTo(Direction.LEFT) else scrollTo(Direction.NON)
+                        toRight -> if (velocityX <= -200) scrollTo(Direction.RIGHT) else scrollTo(Direction.NON)
+                        toBottom -> if (velocityY <= -200) scrollTo(Direction.BOTTOM) else scrollTo(Direction.NON)
                     }
                 }
                 //复位方向标记
