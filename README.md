@@ -1,6 +1,6 @@
 ### 一款四个方向都支持滑动的布局，继承自FrameLayout。
 
-Gif:
+Gif:  
 ![image](https://github.com/xiazunyang/SideSlideLayout/blob/master/demo.gif)
 
 在SideSlideLayout的子View中添加以下属性来指定它们的位置：
